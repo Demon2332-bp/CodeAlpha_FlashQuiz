@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Fredoka", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-vibrant-bg: #4826B9;
+  --color-vibrant-header: rgba(0,0,0,0.2);
+  --color-vibrant-yellow: #FFD93D;
+  --color-vibrant-yellow-dark: #B8860B;
+  --color-vibrant-yellow-shadow: #8B6508;
+  --color-vibrant-text: #2D3436;
+  
+  --color-vibrant-blue: #4592FF;
+  --color-vibrant-blue-border: #2A6DCB;
+  --color-vibrant-pink: #FF4E88;
+  --color-vibrant-pink-border: #D6336C;
+  --color-vibrant-cardyellow: #FFB800;
+  --color-vibrant-cardyellow-border: #E6A600;
+  --color-vibrant-green: #00D284;
+  --color-vibrant-green-border: #00AA6A;
+}
+
+body {
+  font-family: 'Fredoka', sans-serif;
+}
+
+@keyframes float-name {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(10px, -15px); }
+  50% { transform: translate(20px, 0); }
+  75% { transform: translate(10px, 15px); }
+}
+
+.animate-float-name {
+  animation: float-name 8s ease-in-out infinite;
+}
+
+@keyframes float-card {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float-card {
+  animation: float-card 3.5s ease-in-out infinite;
+}
+
+@keyframes flash-red {
+  0%, 100% { background-color: rgba(239, 68, 68, 0.4); }
+  50% { background-color: rgba(239, 68, 68, 0.1); }
+}
+
+.animate-flash-red {
+  animation: flash-red 0.8s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-150%); }
+  to { transform: translateX(250%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s infinite;
+}
+

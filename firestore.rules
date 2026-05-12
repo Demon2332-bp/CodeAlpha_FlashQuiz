@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} { 
+      allow read, write: if false; 
+    }
+
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    function isValidQuiz(data) {
+      return data.keys().hasAll(['adminId', 'title', 'subject', 'timerPerQuestion', 'questions', 'createdAt']) && 
+             data.keys().size() == 6 &&
+             data.adminId is string && data.adminId.size() > 0 &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 100 &&
+             data.subject is string && data.subject.size() <= 50 &&
+             data.timerPerQuestion is number && data.timerPerQuestion > 0 && data.timerPerQuestion <= 120 &&
+             data.questions is list && data.questions.size() <= 50 &&
+             data.createdAt is number;
+    }
+
+    function isValidSessionCreate(data) {
+      return data.keys().hasAll(['adminId', 'quizId', 'status', 'currentQuestionIndex', 'questionEndTime', 'createdAt']) &&
+             data.keys().size() == 6 &&
+             data.adminId is string && data.adminId.size() > 0 &&
+             data.quizId is string && 
+             data.status is string && data.status == 'waiting' &&
+             data.currentQuestionIndex is number && data.currentQuestionIndex == 0 &&
+             data.questionEndTime is number &&
+             data.createdAt is number;
+    }
+
+    function isValidParticipant(data) {
+      return data.keys().hasAll(['name', 'score', 'answers', 'createdAt']) &&
+             data.size() >= 4 && data.size() <= 5 &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 30 &&
+             data.score is number && 
+             data.answers is map &&
+             data.createdAt is number &&
+             (data.size() == 4 || (data.keys().hasAll(['avatarUrl']) && data.avatarUrl is string));
+    }
+
+    match /quizzes/{quizId} {
+      allow get: if isValidId(quizId); // public to read so players can get questions and sessions can pull it
+      allow list: if true;
+      allow create: if isValidId(quizId) && isValidQuiz(incoming());
+      allow update: if isValidQuiz(incoming()) && incoming().adminId == existing().adminId && incoming().createdAt == existing().createdAt;
+      allow delete: if true;
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if isValidId(sessionId); // anyone can read to join
+      allow create: if isValidId(sessionId) && isValidSessionCreate(incoming());
+      
+      allow update: if incoming().adminId == existing().adminId && incoming().quizId == existing().quizId && incoming().createdAt == existing().createdAt && (
+        (incoming().diff(existing()).affectedKeys().hasOnly(['status', 'currentQuestionIndex', 'questionEndTime']))
+      );
+      allow delete: if true;
+
+      match /participants/{participantId} {
+        allow get: if isValidId(participantId);
+        allow list: if true;
+        allow create: if isValidId(participantId) && isValidParticipant(incoming());
+        allow update: if isValidId(participantId) && isValidParticipant(incoming()) && incoming().name == existing().name && incoming().createdAt == existing().createdAt && 
+          incoming().diff(existing()).affectedKeys().hasOnly(['score', 'answers']);
+        allow delete: if true;
+      }
+    }
+  }
+}

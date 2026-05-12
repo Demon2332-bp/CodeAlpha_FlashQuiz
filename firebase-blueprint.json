@@ -1,0 +1,60 @@
+{
+  "entities": {
+    "quiz": {
+      "title": "Quiz",
+      "description": "A quiz template created by an admin",
+      "type": "object",
+      "properties": {
+        "adminId": { "type": "string" },
+        "title": { "type": "string" },
+        "subject": { "type": "string" },
+        "timerPerQuestion": { "type": "number" },
+        "questions": {
+          "type": "array"
+        },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["adminId", "title", "subject", "timerPerQuestion", "questions", "createdAt"]
+    },
+    "session": {
+      "title": "Session",
+      "description": "An active or pending quiz session",
+      "type": "object",
+      "properties": {
+        "adminId": { "type": "string" },
+        "quizId": { "type": "string" },
+        "status": { "type": "string", "enum": ["waiting", "active", "finished"] },
+        "currentQuestionIndex": { "type": "number" },
+        "questionEndTime": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["adminId", "quizId", "status", "currentQuestionIndex", "questionEndTime", "createdAt"]
+    },
+    "participant": {
+      "title": "Participant",
+      "description": "A player in a session",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "score": { "type": "number" },
+        "answers": { "type": "object" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "score", "answers", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/quizzes/{quizId}": {
+      "schema": { "$ref": "#/entities/quiz" },
+      "description": "Stores user-created quizzes."
+    },
+    "/sessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/session" },
+      "description": "Stores active game sessions using a 6-character short code."
+    },
+    "/sessions/{sessionId}/participants/{participantId}": {
+      "schema": { "$ref": "#/entities/participant" },
+      "description": "Stores players who joined the session and their scores/answers."
+    }
+  }
+}
